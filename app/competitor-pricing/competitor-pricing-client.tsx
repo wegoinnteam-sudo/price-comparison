@@ -86,7 +86,11 @@ export function CompetitorPricingClient() {
               return (
                 <a
                   key={room.roomType}
-                  href={competitor.bookingUrl}
+                  href={buildRoomBookingUrl(competitor.name, room.roomType)}
+                  onClick={(event) => {
+                    event.preventDefault();
+                    window.open(buildRoomBookingUrl(competitor.name, room.roomType), "_blank", "noopener,noreferrer");
+                  }}
                   target="_blank"
                   rel="noreferrer"
                   className="rounded-md border bg-secondary/25 p-3 transition-colors hover:border-primary/60 hover:bg-secondary/50 focus:outline-none focus:ring-2 focus:ring-primary"
@@ -99,6 +103,7 @@ export function CompetitorPricingClient() {
                   <p className="mt-2 text-xs text-muted-foreground">주중 {formatKrw(room.weekday)}</p>
                   <p className="text-xs text-muted-foreground">주말 {formatKrw(room.weekend)}</p>
                   <p className="mt-2 text-xs text-primary">Wegoinn {wego ? formatKrw(wego.today) : "-"}</p>
+                  <p className="mt-1 text-xs text-sky-300">해당 룸타입 예약 검색 열기</p>
                 </a>
               );
             })}
@@ -139,6 +144,35 @@ export function CompetitorPricingClient() {
       </section>
     </div>
   );
+}
+
+function buildRoomBookingUrl(competitorName: string, roomType: RoomType) {
+  const checkIn = new Date();
+  checkIn.setDate(checkIn.getDate() + 7);
+
+  const checkOut = new Date(checkIn);
+  checkOut.setDate(checkOut.getDate() + 1);
+
+  const params = new URLSearchParams({
+    ss: `${competitorName} ${roomType}`,
+    checkin: formatBookingDate(checkIn),
+    checkout: formatBookingDate(checkOut),
+    group_adults: roomType.includes("패밀리") || roomType.includes("4벙크") ? "4" : "2",
+    no_rooms: "1",
+    group_children: "0",
+    selected_currency: "KRW",
+    lang: "ko-kr",
+  });
+
+  return `https://www.booking.com/searchresults.html?${params.toString()}`;
+}
+
+function formatBookingDate(date: Date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
 }
 
 function MetricCard({ title, value, caption }: { title: string; value: string; caption: string }) {
