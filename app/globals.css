@@ -1,0 +1,43 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 220 24% 7%;
+  --foreground: 210 20% 96%;
+  --card: 220 22% 10%;
+  --card-foreground: 210 20% 96%;
+  --primary: 168 84% 48%;
+  --primary-foreground: 210 40% 8%;
+  --secondary: 217 18% 17%;
+  --secondary-foreground: 210 20% 96%;
+  --muted: 218 17% 15%;
+  --muted-foreground: 215 16% 66%;
+  --accent: 210 100% 58%;
+  --accent-foreground: 210 20% 96%;
+  --destructive: 0 72% 51%;
+  --destructive-foreground: 210 20% 96%;
+  --border: 218 17% 20%;
+  --input: 218 17% 20%;
+  --ring: 168 84% 48%;
+  --radius: 0.5rem;
+}
+
+* {
+  border-color: hsl(var(--border));
+}
+
+body {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top left, rgba(20, 184, 166, 0.12), transparent 26rem),
+    radial-gradient(circle at top right, rgba(59, 130, 246, 0.1), transparent 24rem),
+    hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-feature-settings: "tnum";
+}
+
+.recharts-cartesian-axis-tick-value {
+  fill: hsl(var(--muted-foreground));
+  font-size: 12px;
+}
