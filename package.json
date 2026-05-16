@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "postbuild": "rm -rf dist && cp -R out dist",
     "lint": "eslint . --max-warnings=0",
     "start": "next start",
     "daily:update": "tsx scripts/daily-update.ts",
