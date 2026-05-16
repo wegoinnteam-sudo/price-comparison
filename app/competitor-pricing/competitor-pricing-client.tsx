@@ -84,7 +84,14 @@ export function CompetitorPricingClient() {
               const gap = wego ? room.average - wego.today : 0;
 
               return (
-                <div key={room.roomType} className="rounded-md border bg-secondary/25 p-3">
+                <a
+                  key={room.roomType}
+                  href={competitor.bookingUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="rounded-md border bg-secondary/25 p-3 transition-colors hover:border-primary/60 hover:bg-secondary/50 focus:outline-none focus:ring-2 focus:ring-primary"
+                  aria-label={`${competitor.name} ${room.roomType} 예약 페이지 열기`}
+                >
                   <div className="flex items-start justify-between gap-2">
                     <p className="text-sm font-medium">{room.roomType}</p>
                     <Badge tone={gap > 0 ? "green" : "amber"}>{gap > 0 ? "+" : ""}{formatKrw(gap)}</Badge>
@@ -92,7 +99,7 @@ export function CompetitorPricingClient() {
                   <p className="mt-2 text-xs text-muted-foreground">주중 {formatKrw(room.weekday)}</p>
                   <p className="text-xs text-muted-foreground">주말 {formatKrw(room.weekend)}</p>
                   <p className="mt-2 text-xs text-primary">Wegoinn {wego ? formatKrw(wego.today) : "-"}</p>
-                </div>
+                </a>
               );
             })}
           </div>

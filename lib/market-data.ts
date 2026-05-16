@@ -66,6 +66,45 @@ export const wegoMonthlyRates = monthLabels.map((month, index) => {
   };
 });
 
+export function getWegoinnRoomMonthlyHistory(selectedRoomTypes: RoomType[]) {
+  return monthLabels.map((month, monthIndex) => {
+    const row: Record<string, string | number> = { month };
+
+    selectedRoomTypes.forEach((roomType) => {
+      const roomIndex = roomTypes.indexOf(roomType);
+      const room = wegoRoomRates[roomIndex];
+      const seasonal = Math.sin(((monthIndex + roomIndex) / 11) * Math.PI) * 18000;
+      row[roomType] = Math.round(room.today + seasonal + monthIndex * 900);
+    });
+
+    return row;
+  });
+}
+
+export function getWegoinnRatesByDate(date: Date) {
+  const day = date.getDay();
+  const isWeekend = day === 5 || day === 6;
+  const monthIndex = date.getMonth();
+  const seasonal = Math.sin((monthIndex / 11) * Math.PI) * 0.1;
+  const dayLift = isWeekend ? 1.08 : 0.98;
+  const dateLift = 1 + ((date.getDate() % 5) - 2) * 0.01 + seasonal;
+
+  const rooms = wegoRoomRates.map((room) => {
+    const base = isWeekend ? room.weekend : room.weekday;
+
+    return {
+      ...room,
+      selectedDateRate: Math.round(base * dayLift * dateLift),
+    };
+  });
+
+  return {
+    dayType: isWeekend ? "주말" : "주중",
+    rooms,
+    average: Math.round(rooms.reduce((sum, room) => sum + room.selectedDateRate, 0) / rooms.length),
+  };
+}
+
 export const wegoWeeklyRates = [
   { week: "이번 주", weekday: 124000, weekend: 151000, blended: 136000 },
   { week: "다음 주", weekday: 129000, weekend: 158000, blended: 142000 },
