@@ -12,6 +12,7 @@ import {
   getWegoinnRatesByDate,
   getWegoinnRoomMonthlyHistory,
   roomTypes,
+  wegoRoomRateSource,
   wegoRoomRates,
   wegoWeeklyRates,
   type RoomType,
@@ -86,6 +87,17 @@ export default function DashboardPage() {
                 <Badge tone="green">{formatKrw(room.selectedDateRate)}</Badge>
               </div>
             ))}
+            <p className="pt-2 text-xs text-muted-foreground">
+              출처:{" "}
+              <a
+                href={wegoRoomRateSource.url}
+                target="_blank"
+                rel="noreferrer"
+                className="font-medium text-primary underline-offset-4 hover:underline"
+              >
+                {wegoRoomRateSource.label}
+              </a>
+            </p>
           </CardContent>
         </Card>
       </section>

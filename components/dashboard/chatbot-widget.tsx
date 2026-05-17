@@ -39,13 +39,18 @@ export function ChatbotWidget() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ messages: nextMessages.slice(-10) }),
       });
-      const result = await response.json() as { reply?: string; error?: string };
+      const result = await response.json() as { reply?: string; error?: string; detail?: string; status?: number };
+      const errorText = [
+        result.error,
+        result.status ? `status ${result.status}` : "",
+        result.detail,
+      ].filter(Boolean).join(" · ");
 
       setMessages((current) => [
         ...current,
         {
           role: "assistant",
-          content: response.ok ? result.reply ?? "답변을 생성하지 못했습니다." : result.error ?? "챗봇 요청에 실패했습니다.",
+          content: response.ok ? result.reply ?? "답변을 생성하지 못했습니다." : errorText || "챗봇 요청에 실패했습니다.",
         },
       ]);
     } catch {
@@ -53,7 +58,7 @@ export function ChatbotWidget() {
         ...current,
         {
           role: "assistant",
-          content: "챗봇 서버에 연결할 수 없습니다. 배포 환경의 OPENAI_API_KEY 설정을 확인해 주세요.",
+          content: "챗봇 서버에 연결할 수 없습니다. 배포 환경의 GEMINI_API_KEY 설정을 확인해 주세요.",
         },
       ]);
     } finally {
@@ -99,7 +104,7 @@ export function ChatbotWidget() {
                       : "border bg-secondary/45 text-foreground"
                   }`}
                 >
-                  {message.content}
+                  <MessageContent content={message.content} />
                 </div>
               </div>
             ))}
@@ -144,5 +149,34 @@ export function ChatbotWidget() {
         <MessageCircle className="h-6 w-6" />
       </button>
     </div>
+  );
+}
+
+function MessageContent({ content }: { content: string }) {
+  const parts = content.split(/(\[[^\]]+\]\(https?:\/\/[^)\s]+\)|https?:\/\/[^\s]+)/g);
+
+  return (
+    <>
+      {parts.map((part, index) => {
+        const markdownLink = part.match(/^\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)$/);
+        const url = markdownLink?.[2] ?? (part.startsWith("http") ? part : null);
+
+        if (!url) {
+          return <span key={`${part}-${index}`}>{part}</span>;
+        }
+
+        return (
+          <a
+            key={`${url}-${index}`}
+            href={url}
+            target="_blank"
+            rel="noreferrer"
+            className="font-medium underline underline-offset-4"
+          >
+            {markdownLink?.[1] ?? url}
+          </a>
+        );
+      })}
+    </>
   );
 }

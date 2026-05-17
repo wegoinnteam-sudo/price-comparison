@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { ExternalLink, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { CompetitorRoomSelectionChart } from "@/components/dashboard/charts";
@@ -20,9 +21,14 @@ import { formatKrw } from "@/lib/utils";
 export function CompetitorPricingClient() {
   const [competitorName, setCompetitorName] = useState(seoulCompetitors[0].name);
   const [selectedRooms, setSelectedRooms] = useState<RoomType[]>(["더블", "패밀리", "트윈배드"]);
+  const [selectedPriceRoom, setSelectedPriceRoom] = useState<RoomType | null>(null);
 
   const competitor = seoulCompetitors.find((item) => item.name === competitorName) ?? seoulCompetitors[0];
   const roomRates = useMemo(() => getCompetitorRoomRates(competitor.name), [competitor.name]);
+  const selectedPrice = selectedPriceRoom ? roomRates.find((room) => room.roomType === selectedPriceRoom) : null;
+  const selectedWegoinnPrice = selectedPriceRoom
+    ? wegoRoomRates.find((room) => room.roomType === selectedPriceRoom)
+    : null;
   const chartData = useMemo(() => {
     const selectedData = getCompetitorRoomMonthlyHistory(competitor.name, selectedRooms);
 
@@ -84,17 +90,12 @@ export function CompetitorPricingClient() {
               const gap = wego ? room.average - wego.today : 0;
 
               return (
-                <a
+                <button
                   key={room.roomType}
-                  href={buildRoomBookingUrl(competitor.name, room.roomType)}
-                  onClick={(event) => {
-                    event.preventDefault();
-                    window.open(buildRoomBookingUrl(competitor.name, room.roomType), "_blank", "noopener,noreferrer");
-                  }}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="rounded-md border bg-secondary/25 p-3 transition-colors hover:border-primary/60 hover:bg-secondary/50 focus:outline-none focus:ring-2 focus:ring-primary"
-                  aria-label={`${competitor.name} ${room.roomType} 예약 페이지 열기`}
+                  type="button"
+                  onClick={() => setSelectedPriceRoom(room.roomType)}
+                  className="rounded-md border bg-secondary/25 p-3 text-left transition-colors hover:border-primary/60 hover:bg-secondary/50 focus:outline-none focus:ring-2 focus:ring-primary"
+                  aria-label={`${competitor.name} ${room.roomType} 가격 확인`}
                 >
                   <div className="flex items-start justify-between gap-2">
                     <p className="text-sm font-medium">{room.roomType}</p>
@@ -103,13 +104,85 @@ export function CompetitorPricingClient() {
                   <p className="mt-2 text-xs text-muted-foreground">주중 {formatKrw(room.weekday)}</p>
                   <p className="text-xs text-muted-foreground">주말 {formatKrw(room.weekend)}</p>
                   <p className="mt-2 text-xs text-primary">Wegoinn {wego ? formatKrw(wego.today) : "-"}</p>
-                  <p className="mt-1 text-xs text-sky-300">해당 룸타입 예약 검색 열기</p>
-                </a>
+                  <p className="mt-1 text-xs text-sky-300">가격 확인 및 OTA 열기</p>
+                </button>
               );
             })}
           </div>
         </CardContent>
       </Card>
+
+      {selectedPrice ? (
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 p-4 sm:items-center">
+          <div className="w-full max-w-xl overflow-hidden rounded-lg border bg-card shadow-2xl">
+            <div className="flex items-start justify-between gap-3 border-b bg-secondary/70 p-4">
+              <div>
+                <p className="text-sm text-muted-foreground">OTA 가격 확인</p>
+                <h2 className="mt-1 text-lg font-semibold">{competitor.name}</h2>
+                <p className="mt-1 text-sm text-primary">{selectedPrice.roomType}</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedPriceRoom(null)}
+                className="flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground hover:bg-secondary hover:text-foreground"
+                aria-label="가격 확인 닫기"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <div className="space-y-4 p-4">
+              <div className="grid gap-3 sm:grid-cols-3">
+                <PriceBox label="경쟁사 주중" value={formatKrw(selectedPrice.weekday)} />
+                <PriceBox label="경쟁사 주말" value={formatKrw(selectedPrice.weekend)} />
+                <PriceBox label="경쟁사 평균" value={formatKrw(selectedPrice.average)} highlight />
+              </div>
+
+              {selectedWegoinnPrice ? (
+                <div className="rounded-md border bg-secondary/30 p-3">
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <p className="text-sm font-medium">Wegoinn Hostel 비교</p>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        현재 {selectedPrice.roomType} 기준가 {formatKrw(selectedWegoinnPrice.today)}
+                      </p>
+                    </div>
+                    <Badge tone={selectedPrice.average > selectedWegoinnPrice.today ? "green" : "amber"}>
+                      {selectedPrice.average > selectedWegoinnPrice.today ? "+" : ""}
+                      {formatKrw(selectedPrice.average - selectedWegoinnPrice.today)}
+                    </Badge>
+                  </div>
+                </div>
+              ) : null}
+
+              <div className="rounded-md border bg-secondary/25 p-3 text-sm text-muted-foreground">
+                앱에 표시된 금액은 대시보드 추정/수집 데이터입니다. 아래 버튼으로 OTA 검색 결과를 열어 실제 판매가와 예약 가능 여부를 확인하세요.
+              </div>
+
+              <div className="grid gap-2 sm:grid-cols-2">
+                <a
+                  href={buildRoomBookingUrl(competitor.name, selectedPrice.roomType)}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground"
+                >
+                  Booking에서 금액 확인
+                  <ExternalLink className="h-4 w-4" />
+                </a>
+                <a
+                  href={buildRoomAgodaUrl(competitor.name, selectedPrice.roomType)}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex h-10 items-center justify-center gap-2 rounded-md border bg-secondary px-4 text-sm font-medium text-foreground hover:bg-secondary/80"
+                >
+                  Agoda에서 금액 확인
+                  <ExternalLink className="h-4 w-4" />
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
 
       <section className="grid gap-4 xl:grid-cols-[300px_1fr]">
         <Card>
@@ -146,6 +219,15 @@ export function CompetitorPricingClient() {
   );
 }
 
+function PriceBox({ label, value, highlight = false }: { label: string; value: string; highlight?: boolean }) {
+  return (
+    <div className={`rounded-md border p-3 ${highlight ? "bg-primary/15" : "bg-secondary/25"}`}>
+      <p className="text-xs text-muted-foreground">{label}</p>
+      <p className="mt-2 text-lg font-semibold">{value}</p>
+    </div>
+  );
+}
+
 function buildRoomBookingUrl(competitorName: string, roomType: RoomType) {
   const checkIn = new Date();
   checkIn.setDate(checkIn.getDate() + 7);
@@ -165,6 +247,26 @@ function buildRoomBookingUrl(competitorName: string, roomType: RoomType) {
   });
 
   return `https://www.booking.com/searchresults.html?${params.toString()}`;
+}
+
+function buildRoomAgodaUrl(competitorName: string, roomType: RoomType) {
+  const checkIn = new Date();
+  checkIn.setDate(checkIn.getDate() + 7);
+
+  const checkOut = new Date(checkIn);
+  checkOut.setDate(checkOut.getDate() + 1);
+
+  const params = new URLSearchParams({
+    text: `${competitorName} ${roomType}`,
+    checkIn: formatBookingDate(checkIn),
+    checkOut: formatBookingDate(checkOut),
+    rooms: "1",
+    adults: roomType.includes("패밀리") || roomType.includes("4벙크") ? "4" : "2",
+    children: "0",
+    currency: "KRW",
+  });
+
+  return `https://www.agoda.com/search?${params.toString()}`;
 }
 
 function formatBookingDate(date: Date) {

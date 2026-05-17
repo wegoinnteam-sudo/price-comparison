@@ -5,6 +5,7 @@ import {
   pricingHistory,
   tourismTrend,
   wegoAverageRate,
+  wegoRoomRateSource,
   wegoRoomRates,
   wegoWeeklyRates,
 } from "../../lib/market-data";
@@ -15,8 +16,8 @@ type ChatMessage = {
 };
 
 type Env = {
-  OPENAI_API_KEY?: string;
-  OPENAI_MODEL?: string;
+  GEMINI_API_KEY?: string;
+  GEMINI_MODEL?: string;
 };
 
 type PagesContext<Bindings> = {
@@ -25,8 +26,11 @@ type PagesContext<Bindings> = {
 };
 
 export const onRequestPost = async ({ request, env }: PagesContext<Env>) => {
-  if (!env.OPENAI_API_KEY) {
-    return jsonResponse({ error: "OPENAI_API_KEY is not configured." }, 500);
+  const apiKey = env.GEMINI_API_KEY?.trim();
+  const model = env.GEMINI_MODEL?.trim() || "gemini-3-flash-preview";
+
+  if (!apiKey) {
+    return jsonResponse({ error: "GEMINI_API_KEY is not configured." }, 500);
   }
 
   const payload = await request.json().catch(() => null) as { messages?: ChatMessage[] } | null;
@@ -38,43 +42,82 @@ export const onRequestPost = async ({ request, env }: PagesContext<Env>) => {
     return jsonResponse({ error: "A user message is required." }, 400);
   }
 
-  const response = await fetch("https://api.openai.com/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${env.OPENAI_API_KEY}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model: env.OPENAI_MODEL ?? "gpt-4o-mini",
-      temperature: 0.2,
-      messages: [
-        {
-          role: "system",
-          content:
-            "You are a concise Korean assistant for Wegoinn Hostel's pricing dashboard. Answer only from the provided dashboard context. If the user asks for information not present in the context, say that the dashboard data does not include it yet. Focus on daily notes, pricing, demand, competitor movement, and action items.",
+  let response: Response;
+
+  try {
+    response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
+      method: "POST",
+      headers: {
+        "x-goog-api-key": apiKey,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        systemInstruction: {
+          parts: [
+            {
+              text:
+                "You are a concise Korean assistant for Wegoinn Hostel's pricing dashboard. Answer only from the provided dashboard context. If the user asks for information not present in the context, say that the dashboard data does not include it yet. Focus on daily notes, pricing, demand, competitor movement, and action items. When answering Wegoinn Hostel room-type prices, add exactly one final source line in Korean using this format: 출처: [source label](source URL).",
+            },
+          ],
         },
-        {
-          role: "user",
-          content: JSON.stringify({
-            today: new Date().toISOString().slice(0, 10),
-            dashboardContext: buildDashboardContext(),
-          }),
+        contents: [
+          {
+            role: "user",
+            parts: [
+              {
+                text: JSON.stringify({
+                  today: new Date().toISOString().slice(0, 10),
+                  dashboardContext: buildDashboardContext(),
+                }),
+              },
+            ],
+          },
+          ...messages.map((message) => ({
+            role: message.role === "assistant" ? "model" : "user",
+            parts: [{ text: message.content }],
+          })),
+        ],
+        generationConfig: {
+          temperature: 0.2,
+          maxOutputTokens: 700,
         },
-        ...messages,
-      ],
-    }),
-  });
+      }),
+    });
+  } catch (error) {
+    return jsonResponse(
+      {
+        error: "Gemini network request failed.",
+        detail: error instanceof Error ? error.message : "Unknown network error",
+      },
+      502,
+    );
+  }
 
   if (!response.ok) {
-    const detail = await response.text();
-    return jsonResponse({ error: "OpenAI request failed.", detail }, 502);
+    const detail = await readGeminiError(response);
+    return jsonResponse(
+      {
+        error: "Gemini request failed.",
+        detail,
+        status: response.status,
+      },
+      502,
+    );
   }
 
   const result = await response.json() as {
-    choices?: Array<{ message?: { content?: string } }>;
+    candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>;
   };
 
-  return jsonResponse({ reply: result.choices?.[0]?.message?.content ?? "답변을 생성하지 못했습니다." });
+  return jsonResponse({ reply: extractGeminiText(result) ?? "답변을 생성하지 못했습니다." });
+};
+
+export const onRequestGet = async ({ env }: PagesContext<Env>) => {
+  return jsonResponse({
+    ok: true,
+    geminiKeyConfigured: Boolean(env.GEMINI_API_KEY?.trim()),
+    model: env.GEMINI_MODEL?.trim() || "gemini-3-flash-preview",
+  });
 };
 
 function buildDashboardContext() {
@@ -82,6 +125,7 @@ function buildDashboardContext() {
     wegoinn: {
       averageRate: wegoAverageRate,
       roomRates: wegoRoomRates,
+      roomRateSource: wegoRoomRateSource,
       weeklyRates: wegoWeeklyRates,
     },
     market: {
@@ -101,4 +145,26 @@ function jsonResponse(body: unknown, status = 200) {
       "Content-Type": "application/json; charset=utf-8",
     },
   });
+}
+
+function extractGeminiText(result: { candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }> }) {
+  return result.candidates?.[0]?.content?.parts
+    ?.map((part) => part.text ?? "")
+    .join("")
+    .trim();
+}
+
+async function readGeminiError(response: Response) {
+  const text = await response.text();
+
+  try {
+    const parsed = JSON.parse(text) as { error?: { message?: string; status?: string; code?: number } };
+    const message = parsed.error?.message ?? text;
+    const status = parsed.error?.status ? ` status=${parsed.error.status}` : "";
+    const code = parsed.error?.code ? ` code=${parsed.error.code}` : "";
+
+    return `${message}${status}${code}`.trim();
+  } catch {
+    return text;
+  }
 }

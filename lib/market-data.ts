@@ -26,6 +26,11 @@ export type Competitor = {
   bookingUrl: string;
 };
 
+export const wegoRoomRateSource = {
+  label: "Wegoinn Hostel 룸타입 기준",
+  url: "https://www.wegoinn.com/roomtype.html",
+};
+
 const monthLabels = [
   "1월",
   "2월",
