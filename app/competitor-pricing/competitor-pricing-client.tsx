@@ -16,18 +16,20 @@ import {
 } from "@/lib/market-data";
 import { formatKrw } from "@/lib/utils";
 
-type StarFilter = "all" | "1" | "2" | "3" | "4" | "5";
+type StarRating = 1 | 2 | 3 | 4 | 5;
+
+const starOptions: StarRating[] = [1, 2, 3, 4, 5];
 
 export function CompetitorPricingClient() {
   const [competitorName, setCompetitorName] = useState(seoulCompetitors[0].name);
-  const [starFilter, setStarFilter] = useState<StarFilter>("all");
+  const [selectedStarRatings, setSelectedStarRatings] = useState<StarRating[]>(starOptions);
   const [selectedDateValue, setSelectedDateValue] = useState("2026-05-16");
   const [selectedRooms, setSelectedRooms] = useState<RoomType[]>(["더블", "패밀리", "트윈배드"]);
   const [selectedPriceRoom, setSelectedPriceRoom] = useState<RoomType | null>(null);
 
   const filteredCompetitors = useMemo(
-    () => seoulCompetitors.filter((item) => starFilter === "all" || String(item.starRating) === starFilter),
-    [starFilter],
+    () => seoulCompetitors.filter((item) => selectedStarRatings.includes(item.starRating)),
+    [selectedStarRatings],
   );
   const competitor = filteredCompetitors.find((item) => item.name === competitorName) ?? filteredCompetitors[0] ?? seoulCompetitors[0];
   const selectedDate = useMemo(() => new Date(`${selectedDateValue}T00:00:00`), [selectedDateValue]);
@@ -44,10 +46,6 @@ export function CompetitorPricingClient() {
     ? wegoinnDateInfo.rooms.find((room) => room.roomType === selectedPriceRoom)
     : null;
   const averageGap = competitorDateInfo.average - wegoinnDateInfo.average;
-  const starOptions = useMemo(
-    () => Array.from(new Set(seoulCompetitors.map((item) => item.starRating))).sort((a, b) => a - b),
-    [],
-  );
   const chartData = useMemo(() => {
     const selectedData = getCompetitorRoomMonthlyHistory(competitor.name, selectedRooms);
 
@@ -67,13 +65,17 @@ export function CompetitorPricingClient() {
     });
   }
 
-  function changeStarFilter(nextStarFilter: StarFilter) {
-    const nextCompetitors = seoulCompetitors.filter(
-      (item) => nextStarFilter === "all" || String(item.starRating) === nextStarFilter,
-    );
+  function toggleStarRating(rating: StarRating) {
+    const nextRatings = selectedStarRatings.includes(rating)
+      ? selectedStarRatings.filter((item) => item !== rating)
+      : [...selectedStarRatings, rating].sort((a, b) => a - b);
+    const effectiveRatings = nextRatings.length ? nextRatings : selectedStarRatings;
+    const nextCompetitors = seoulCompetitors.filter((item) => effectiveRatings.includes(item.starRating));
 
-    setStarFilter(nextStarFilter);
-    setCompetitorName(nextCompetitors[0]?.name ?? seoulCompetitors[0].name);
+    setSelectedStarRatings(effectiveRatings);
+    if (!nextCompetitors.some((item) => item.name === competitorName)) {
+      setCompetitorName(nextCompetitors[0]?.name ?? seoulCompetitors[0].name);
+    }
     setSelectedPriceRoom(null);
   }
 
@@ -92,22 +94,25 @@ export function CompetitorPricingClient() {
         </CardHeader>
         <CardContent className="grid gap-4 lg:grid-cols-[340px_1fr]">
           <div className="space-y-3">
-            <label className="text-sm font-medium" htmlFor="star-rating">
-              성급
-            </label>
-            <select
-              id="star-rating"
-              value={starFilter}
-              onChange={(event) => changeStarFilter(event.target.value as StarFilter)}
-              className="h-10 w-full rounded-md border bg-secondary px-3 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary"
-            >
-              <option value="all">전체 성급</option>
-              {starOptions.map((rating) => (
-                <option key={rating} value={rating}>
-                  {rating}성
-                </option>
-              ))}
-            </select>
+            <div className="space-y-2">
+              <p className="text-sm font-medium">성급</p>
+              <div className="grid grid-cols-5 gap-2">
+                {starOptions.map((rating) => (
+                  <label
+                    key={rating}
+                    className="flex h-10 items-center justify-center gap-2 rounded-md border bg-secondary/25 px-2 text-sm"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={selectedStarRatings.includes(rating)}
+                      onChange={() => toggleStarRating(rating)}
+                      className="h-4 w-4 accent-teal-400"
+                    />
+                    <span>{rating}성</span>
+                  </label>
+                ))}
+              </div>
+            </div>
 
             <label className="text-sm font-medium" htmlFor="competitor">
               경쟁업체
