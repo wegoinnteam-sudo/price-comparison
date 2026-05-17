@@ -22,6 +22,7 @@ export type PricingRow = {
 export type Competitor = {
   name: string;
   area: string;
+  starRating: 1 | 2 | 3 | 4 | 5;
   otaUrl: string;
   bookingUrl: string;
 };
@@ -118,36 +119,36 @@ export const wegoWeeklyRates = [
 ];
 
 export const seoulCompetitors: Competitor[] = [
-  { name: "57 Myeongdong Hostel", area: "Myeongdong", otaUrl: "https://www.agoda.com/search?text=57%20Myeongdong%20Hostel%20Seoul", bookingUrl: "https://www.booking.com/searchresults.html?ss=57%20Myeongdong%20Hostel%20Seoul" },
-  { name: "Bunk Guesthouse Hostel", area: "Hongdae", otaUrl: "https://www.agoda.com/search?text=Bunk%20Guesthouse%20Hostel%20Seoul", bookingUrl: "https://www.booking.com/searchresults.html?ss=Bunk%20Guesthouse%20Hostel%20Seoul" },
-  { name: "Dream Guest House Myeongdong", area: "Myeongdong", otaUrl: "https://www.agoda.com/search?text=Dream%20Guest%20House%20Myeongdong", bookingUrl: "https://www.booking.com/searchresults.html?ss=Dream%20Guest%20House%20Myeongdong" },
-  { name: "SH Seoul Hostel", area: "Hongdae", otaUrl: "https://www.agoda.com/search?text=SH%20Seoul%20Hostel", bookingUrl: "https://www.booking.com/searchresults.html?ss=SH%20Seoul%20Hostel" },
-  { name: "OYO Hostel Myeongdong 1", area: "Myeongdong", otaUrl: "https://www.agoda.com/search?text=OYO%20Hostel%20Myeongdong%201", bookingUrl: "https://www.booking.com/searchresults.html?ss=OYO%20Hostel%20Myeongdong%201" },
-  { name: "OYO Hostel Myeongdong 2", area: "Myeongdong", otaUrl: "https://www.agoda.com/search?text=OYO%20Hostel%20Myeongdong%202", bookingUrl: "https://www.booking.com/searchresults.html?ss=OYO%20Hostel%20Myeongdong%202" },
-  { name: "OYO Hostel Myeongdong 3", area: "Myeongdong", otaUrl: "https://www.agoda.com/search?text=OYO%20Hostel%20Myeongdong%203", bookingUrl: "https://www.booking.com/searchresults.html?ss=OYO%20Hostel%20Myeongdong%203" },
-  { name: "OYO Hostel Myeongdong 5", area: "Myeongdong", otaUrl: "https://www.agoda.com/search?text=OYO%20Hostel%20Myeongdong%205", bookingUrl: "https://www.booking.com/searchresults.html?ss=OYO%20Hostel%20Myeongdong%205" },
-  { name: "OYO Hostel Myeongdong 6", area: "Myeongdong", otaUrl: "https://www.agoda.com/search?text=OYO%20Hostel%20Myeongdong%206", bookingUrl: "https://www.booking.com/searchresults.html?ss=OYO%20Hostel%20Myeongdong%206" },
-  { name: "Step Inn Myeongdong 1", area: "Myeongdong", otaUrl: "https://www.agoda.com/search?text=Step%20Inn%20Myeongdong%201", bookingUrl: "https://www.booking.com/searchresults.html?ss=Step%20Inn%20Myeongdong%201" },
-  { name: "Step Inn Myeongdong 2", area: "Myeongdong", otaUrl: "https://www.agoda.com/search?text=Step%20Inn%20Myeongdong%202", bookingUrl: "https://www.booking.com/searchresults.html?ss=Step%20Inn%20Myeongdong%202" },
-  { name: "K-Grand Hostel Myeongdong", area: "Myeongdong", otaUrl: "https://www.agoda.com/search?text=K-Grand%20Hostel%20Myeongdong", bookingUrl: "https://www.booking.com/searchresults.html?ss=K-Grand%20Hostel%20Myeongdong" },
-  { name: "K-Guesthouse Dongdaemun Premium", area: "Dongdaemun", otaUrl: "https://www.agoda.com/search?text=K-Guesthouse%20Dongdaemun%20Premium", bookingUrl: "https://www.booking.com/searchresults.html?ss=K-Guesthouse%20Dongdaemun%20Premium" },
-  { name: "K-Stay Guesthouse Dongdaemun", area: "Dongdaemun", otaUrl: "https://www.agoda.com/search?text=K-Stay%20Guesthouse%20Dongdaemun", bookingUrl: "https://www.booking.com/searchresults.html?ss=K-Stay%20Guesthouse%20Dongdaemun" },
-  { name: "G Guesthouse Itaewon", area: "Itaewon", otaUrl: "https://www.agoda.com/search?text=G%20Guesthouse%20Itaewon%20Seoul", bookingUrl: "https://www.booking.com/searchresults.html?ss=G%20Guesthouse%20Itaewon%20Seoul" },
-  { name: "Insadong R Guesthouse", area: "Jongno", otaUrl: "https://www.agoda.com/search?text=Insadong%20R%20Guesthouse", bookingUrl: "https://www.booking.com/searchresults.html?ss=Insadong%20R%20Guesthouse" },
-  { name: "Stay Maru Jongno", area: "Jongno", otaUrl: "https://www.agoda.com/search?text=Stay%20Maru%20Jongno", bookingUrl: "https://www.booking.com/searchresults.html?ss=Stay%20Maru%20Jongno" },
-  { name: "Seoul Cube Jongro", area: "Jongno", otaUrl: "https://www.agoda.com/search?text=Seoul%20Cube%20Jongro", bookingUrl: "https://www.booking.com/searchresults.html?ss=Seoul%20Cube%20Jongro" },
-  { name: "ZZZip Guesthouse Hongdae", area: "Hongdae", otaUrl: "https://www.agoda.com/search?text=ZZZip%20Guesthouse%20Hongdae", bookingUrl: "https://www.booking.com/searchresults.html?ss=ZZZip%20Guesthouse%20Hongdae" },
-  { name: "Dreaming Hostel Sinchon Hongdae", area: "Sinchon", otaUrl: "https://www.agoda.com/search?text=Dreaming%20Hostel%20Sinchon%20Hongdae", bookingUrl: "https://www.booking.com/searchresults.html?ss=Dreaming%20Hostel%20Sinchon%20Hongdae" },
-  { name: "All Stay Hostel", area: "Jongno", otaUrl: "https://www.agoda.com/search?text=All%20Stay%20Hostel%20Seoul", bookingUrl: "https://www.booking.com/searchresults.html?ss=All%20Stay%20Hostel%20Seoul" },
-  { name: "Seoulite Inn Myeongdong", area: "Myeongdong", otaUrl: "https://www.agoda.com/search?text=Seoulite%20Inn%20Myeongdong", bookingUrl: "https://www.booking.com/searchresults.html?ss=Seoulite%20Inn%20Myeongdong" },
-  { name: "Be My Guesthouse Myeongdong", area: "Myeongdong", otaUrl: "https://www.agoda.com/search?text=Be%20My%20Guesthouse%20Myeongdong", bookingUrl: "https://www.booking.com/searchresults.html?ss=Be%20My%20Guesthouse%20Myeongdong" },
-  { name: "Hi Jun Guesthouse", area: "Hongdae", otaUrl: "https://www.agoda.com/search?text=Hi%20Jun%20Guesthouse%20Seoul", bookingUrl: "https://www.booking.com/searchresults.html?ss=Hi%20Jun%20Guesthouse%20Seoul" },
-  { name: "Hongdae Guesthouse Cocon Stay", area: "Hongdae", otaUrl: "https://www.agoda.com/search?text=Hongdae%20Guesthouse%20Cocon%20Stay", bookingUrl: "https://www.booking.com/searchresults.html?ss=Hongdae%20Guesthouse%20Cocon%20Stay" },
-  { name: "Hostel Korea Original", area: "Jongno", otaUrl: "https://www.agoda.com/search?text=Hostel%20Korea%20Original%20Seoul", bookingUrl: "https://www.booking.com/searchresults.html?ss=Hostel%20Korea%20Original%20Seoul" },
-  { name: "Time Travelers Party Hostel", area: "Hongdae", otaUrl: "https://www.agoda.com/search?text=Time%20Travelers%20Party%20Hostel%20Seoul", bookingUrl: "https://www.booking.com/searchresults.html?ss=Time%20Travelers%20Party%20Hostel%20Seoul" },
-  { name: "Seoul Station R Guesthouse", area: "Seoul Station", otaUrl: "https://www.agoda.com/search?text=Seoul%20Station%20R%20Guesthouse", bookingUrl: "https://www.booking.com/searchresults.html?ss=Seoul%20Station%20R%20Guesthouse" },
-  { name: "Philstay Myeongdong", area: "Myeongdong", otaUrl: "https://www.agoda.com/search?text=Philstay%20Myeongdong", bookingUrl: "https://www.booking.com/searchresults.html?ss=Philstay%20Myeongdong" },
-  { name: "Myeongdong Rooftop Hostel", area: "Myeongdong", otaUrl: "https://www.agoda.com/search?text=Myeongdong%20Rooftop%20Hostel", bookingUrl: "https://www.booking.com/searchresults.html?ss=Myeongdong%20Rooftop%20Hostel" },
+  { name: "57 Myeongdong Hostel", area: "Myeongdong", starRating: 3, otaUrl: "https://www.agoda.com/search?text=57%20Myeongdong%20Hostel%20Seoul", bookingUrl: "https://www.booking.com/searchresults.html?ss=57%20Myeongdong%20Hostel%20Seoul" },
+  { name: "Bunk Guesthouse Hostel", area: "Hongdae", starRating: 2, otaUrl: "https://www.agoda.com/search?text=Bunk%20Guesthouse%20Hostel%20Seoul", bookingUrl: "https://www.booking.com/searchresults.html?ss=Bunk%20Guesthouse%20Hostel%20Seoul" },
+  { name: "Dream Guest House Myeongdong", area: "Myeongdong", starRating: 2, otaUrl: "https://www.agoda.com/search?text=Dream%20Guest%20House%20Myeongdong", bookingUrl: "https://www.booking.com/searchresults.html?ss=Dream%20Guest%20House%20Myeongdong" },
+  { name: "SH Seoul Hostel", area: "Hongdae", starRating: 2, otaUrl: "https://www.agoda.com/search?text=SH%20Seoul%20Hostel", bookingUrl: "https://www.booking.com/searchresults.html?ss=SH%20Seoul%20Hostel" },
+  { name: "OYO Hostel Myeongdong 1", area: "Myeongdong", starRating: 2, otaUrl: "https://www.agoda.com/search?text=OYO%20Hostel%20Myeongdong%201", bookingUrl: "https://www.booking.com/searchresults.html?ss=OYO%20Hostel%20Myeongdong%201" },
+  { name: "OYO Hostel Myeongdong 2", area: "Myeongdong", starRating: 2, otaUrl: "https://www.agoda.com/search?text=OYO%20Hostel%20Myeongdong%202", bookingUrl: "https://www.booking.com/searchresults.html?ss=OYO%20Hostel%20Myeongdong%202" },
+  { name: "OYO Hostel Myeongdong 3", area: "Myeongdong", starRating: 2, otaUrl: "https://www.agoda.com/search?text=OYO%20Hostel%20Myeongdong%203", bookingUrl: "https://www.booking.com/searchresults.html?ss=OYO%20Hostel%20Myeongdong%203" },
+  { name: "OYO Hostel Myeongdong 5", area: "Myeongdong", starRating: 2, otaUrl: "https://www.agoda.com/search?text=OYO%20Hostel%20Myeongdong%205", bookingUrl: "https://www.booking.com/searchresults.html?ss=OYO%20Hostel%20Myeongdong%205" },
+  { name: "OYO Hostel Myeongdong 6", area: "Myeongdong", starRating: 2, otaUrl: "https://www.agoda.com/search?text=OYO%20Hostel%20Myeongdong%206", bookingUrl: "https://www.booking.com/searchresults.html?ss=OYO%20Hostel%20Myeongdong%206" },
+  { name: "Step Inn Myeongdong 1", area: "Myeongdong", starRating: 3, otaUrl: "https://www.agoda.com/search?text=Step%20Inn%20Myeongdong%201", bookingUrl: "https://www.booking.com/searchresults.html?ss=Step%20Inn%20Myeongdong%201" },
+  { name: "Step Inn Myeongdong 2", area: "Myeongdong", starRating: 3, otaUrl: "https://www.agoda.com/search?text=Step%20Inn%20Myeongdong%202", bookingUrl: "https://www.booking.com/searchresults.html?ss=Step%20Inn%20Myeongdong%202" },
+  { name: "K-Grand Hostel Myeongdong", area: "Myeongdong", starRating: 3, otaUrl: "https://www.agoda.com/search?text=K-Grand%20Hostel%20Myeongdong", bookingUrl: "https://www.booking.com/searchresults.html?ss=K-Grand%20Hostel%20Myeongdong" },
+  { name: "K-Guesthouse Dongdaemun Premium", area: "Dongdaemun", starRating: 3, otaUrl: "https://www.agoda.com/search?text=K-Guesthouse%20Dongdaemun%20Premium", bookingUrl: "https://www.booking.com/searchresults.html?ss=K-Guesthouse%20Dongdaemun%20Premium" },
+  { name: "K-Stay Guesthouse Dongdaemun", area: "Dongdaemun", starRating: 2, otaUrl: "https://www.agoda.com/search?text=K-Stay%20Guesthouse%20Dongdaemun", bookingUrl: "https://www.booking.com/searchresults.html?ss=K-Stay%20Guesthouse%20Dongdaemun" },
+  { name: "G Guesthouse Itaewon", area: "Itaewon", starRating: 2, otaUrl: "https://www.agoda.com/search?text=G%20Guesthouse%20Itaewon%20Seoul", bookingUrl: "https://www.booking.com/searchresults.html?ss=G%20Guesthouse%20Itaewon%20Seoul" },
+  { name: "Insadong R Guesthouse", area: "Jongno", starRating: 2, otaUrl: "https://www.agoda.com/search?text=Insadong%20R%20Guesthouse", bookingUrl: "https://www.booking.com/searchresults.html?ss=Insadong%20R%20Guesthouse" },
+  { name: "Stay Maru Jongno", area: "Jongno", starRating: 2, otaUrl: "https://www.agoda.com/search?text=Stay%20Maru%20Jongno", bookingUrl: "https://www.booking.com/searchresults.html?ss=Stay%20Maru%20Jongno" },
+  { name: "Seoul Cube Jongro", area: "Jongno", starRating: 3, otaUrl: "https://www.agoda.com/search?text=Seoul%20Cube%20Jongro", bookingUrl: "https://www.booking.com/searchresults.html?ss=Seoul%20Cube%20Jongro" },
+  { name: "ZZZip Guesthouse Hongdae", area: "Hongdae", starRating: 2, otaUrl: "https://www.agoda.com/search?text=ZZZip%20Guesthouse%20Hongdae", bookingUrl: "https://www.booking.com/searchresults.html?ss=ZZZip%20Guesthouse%20Hongdae" },
+  { name: "Dreaming Hostel Sinchon Hongdae", area: "Sinchon", starRating: 2, otaUrl: "https://www.agoda.com/search?text=Dreaming%20Hostel%20Sinchon%20Hongdae", bookingUrl: "https://www.booking.com/searchresults.html?ss=Dreaming%20Hostel%20Sinchon%20Hongdae" },
+  { name: "All Stay Hostel", area: "Jongno", starRating: 3, otaUrl: "https://www.agoda.com/search?text=All%20Stay%20Hostel%20Seoul", bookingUrl: "https://www.booking.com/searchresults.html?ss=All%20Stay%20Hostel%20Seoul" },
+  { name: "Seoulite Inn Myeongdong", area: "Myeongdong", starRating: 3, otaUrl: "https://www.agoda.com/search?text=Seoulite%20Inn%20Myeongdong", bookingUrl: "https://www.booking.com/searchresults.html?ss=Seoulite%20Inn%20Myeongdong" },
+  { name: "Be My Guesthouse Myeongdong", area: "Myeongdong", starRating: 2, otaUrl: "https://www.agoda.com/search?text=Be%20My%20Guesthouse%20Myeongdong", bookingUrl: "https://www.booking.com/searchresults.html?ss=Be%20My%20Guesthouse%20Myeongdong" },
+  { name: "Hi Jun Guesthouse", area: "Hongdae", starRating: 2, otaUrl: "https://www.agoda.com/search?text=Hi%20Jun%20Guesthouse%20Seoul", bookingUrl: "https://www.booking.com/searchresults.html?ss=Hi%20Jun%20Guesthouse%20Seoul" },
+  { name: "Hongdae Guesthouse Cocon Stay", area: "Hongdae", starRating: 2, otaUrl: "https://www.agoda.com/search?text=Hongdae%20Guesthouse%20Cocon%20Stay", bookingUrl: "https://www.booking.com/searchresults.html?ss=Hongdae%20Guesthouse%20Cocon%20Stay" },
+  { name: "Hostel Korea Original", area: "Jongno", starRating: 2, otaUrl: "https://www.agoda.com/search?text=Hostel%20Korea%20Original%20Seoul", bookingUrl: "https://www.booking.com/searchresults.html?ss=Hostel%20Korea%20Original%20Seoul" },
+  { name: "Time Travelers Party Hostel", area: "Hongdae", starRating: 2, otaUrl: "https://www.agoda.com/search?text=Time%20Travelers%20Party%20Hostel%20Seoul", bookingUrl: "https://www.booking.com/searchresults.html?ss=Time%20Travelers%20Party%20Hostel%20Seoul" },
+  { name: "Seoul Station R Guesthouse", area: "Seoul Station", starRating: 3, otaUrl: "https://www.agoda.com/search?text=Seoul%20Station%20R%20Guesthouse", bookingUrl: "https://www.booking.com/searchresults.html?ss=Seoul%20Station%20R%20Guesthouse" },
+  { name: "Philstay Myeongdong", area: "Myeongdong", starRating: 3, otaUrl: "https://www.agoda.com/search?text=Philstay%20Myeongdong", bookingUrl: "https://www.booking.com/searchresults.html?ss=Philstay%20Myeongdong" },
+  { name: "Myeongdong Rooftop Hostel", area: "Myeongdong", starRating: 3, otaUrl: "https://www.agoda.com/search?text=Myeongdong%20Rooftop%20Hostel", bookingUrl: "https://www.booking.com/searchresults.html?ss=Myeongdong%20Rooftop%20Hostel" },
 ];
 
 export function getCompetitorRoomRates(name: string) {
@@ -163,6 +164,28 @@ export function getCompetitorRoomRates(name: string) {
       average: Math.round(base * 1.07 + 3000),
     };
   });
+}
+
+export function getCompetitorRatesByDate(name: string, date: Date) {
+  const day = date.getDay();
+  const isWeekend = day === 5 || day === 6;
+  const monthIndex = date.getMonth();
+  const seasonal = Math.sin((monthIndex / 11) * Math.PI) * 0.08;
+  const dateLift = 1 + ((date.getDate() % 6) - 2) * 0.012 + seasonal;
+  const rooms = getCompetitorRoomRates(name).map((room) => {
+    const base = isWeekend ? room.weekend : room.weekday;
+
+    return {
+      ...room,
+      selectedDateRate: Math.round(base * dateLift),
+    };
+  });
+
+  return {
+    dayType: isWeekend ? "주말" : "주중",
+    rooms,
+    average: Math.round(rooms.reduce((sum, room) => sum + room.selectedDateRate, 0) / rooms.length),
+  };
 }
 
 export function getCompetitorMonthlyHistory(name: string, selectedRoomTypes: RoomType[] = [...roomTypes]) {
