@@ -22,14 +22,14 @@ const starOptions: StarRating[] = [1, 2, 3, 4, 5];
 
 export function CompetitorPricingClient() {
   const [competitorName, setCompetitorName] = useState(seoulCompetitors[0].name);
-  const [selectedStarRatings, setSelectedStarRatings] = useState<StarRating[]>(starOptions);
+  const [selectedStarRating, setSelectedStarRating] = useState<StarRating>(seoulCompetitors[0].starRating);
   const [selectedDateValue, setSelectedDateValue] = useState("2026-05-16");
   const [selectedRooms, setSelectedRooms] = useState<RoomType[]>(["더블", "패밀리", "트윈배드"]);
   const [selectedPriceRoom, setSelectedPriceRoom] = useState<RoomType | null>(null);
 
   const filteredCompetitors = useMemo(
-    () => seoulCompetitors.filter((item) => selectedStarRatings.includes(item.starRating)),
-    [selectedStarRatings],
+    () => seoulCompetitors.filter((item) => item.starRating === selectedStarRating),
+    [selectedStarRating],
   );
   const competitor = filteredCompetitors.find((item) => item.name === competitorName) ?? filteredCompetitors[0] ?? seoulCompetitors[0];
   const selectedDate = useMemo(() => new Date(`${selectedDateValue}T00:00:00`), [selectedDateValue]);
@@ -65,17 +65,16 @@ export function CompetitorPricingClient() {
     });
   }
 
-  function toggleStarRating(rating: StarRating) {
-    const nextRatings = selectedStarRatings.includes(rating)
-      ? selectedStarRatings.filter((item) => item !== rating)
-      : [...selectedStarRatings, rating].sort((a, b) => a - b);
-    const effectiveRatings = nextRatings.length ? nextRatings : selectedStarRatings;
-    const nextCompetitors = seoulCompetitors.filter((item) => effectiveRatings.includes(item.starRating));
+  function selectStarRating(rating: StarRating) {
+    const nextCompetitors = seoulCompetitors.filter((item) => item.starRating === rating);
 
-    setSelectedStarRatings(effectiveRatings);
-    if (!nextCompetitors.some((item) => item.name === competitorName)) {
-      setCompetitorName(nextCompetitors[0]?.name ?? seoulCompetitors[0].name);
-    }
+    setSelectedStarRating(rating);
+    setCompetitorName(nextCompetitors[0]?.name ?? seoulCompetitors[0].name);
+    setSelectedPriceRoom(null);
+  }
+
+  function selectCompetitor(name: string) {
+    setCompetitorName(name);
     setSelectedPriceRoom(null);
   }
 
@@ -98,37 +97,44 @@ export function CompetitorPricingClient() {
               <p className="text-sm font-medium">성급</p>
               <div className="grid grid-cols-5 gap-2">
                 {starOptions.map((rating) => (
-                  <label
+                  <button
                     key={rating}
-                    className="flex h-10 items-center justify-center gap-2 rounded-md border bg-secondary/25 px-2 text-sm"
+                    type="button"
+                    onClick={() => selectStarRating(rating)}
+                    className={`h-10 rounded-md border px-2 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-primary ${
+                      selectedStarRating === rating
+                        ? "border-primary bg-primary text-primary-foreground"
+                        : "bg-secondary/25 text-foreground hover:border-primary/60 hover:bg-secondary/50"
+                    }`}
+                    aria-pressed={selectedStarRating === rating}
                   >
-                    <input
-                      type="checkbox"
-                      checked={selectedStarRatings.includes(rating)}
-                      onChange={() => toggleStarRating(rating)}
-                      className="h-4 w-4 accent-teal-400"
-                    />
-                    <span>{rating}성</span>
-                  </label>
+                    {rating}성
+                  </button>
                 ))}
               </div>
             </div>
 
-            <label className="text-sm font-medium" htmlFor="competitor">
-              경쟁업체
-            </label>
-            <select
-              id="competitor"
-              value={competitor.name}
-              onChange={(event) => setCompetitorName(event.target.value)}
-              className="h-10 w-full rounded-md border bg-secondary px-3 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary"
-            >
-              {filteredCompetitors.map((item) => (
-                <option key={item.name} value={item.name}>
-                  {item.name} · {item.starRating}성
-                </option>
-              ))}
-            </select>
+            <div className="space-y-2">
+              <p className="text-sm font-medium">{selectedStarRating}성 경쟁업체</p>
+              <div className="max-h-72 space-y-2 overflow-y-auto pr-1">
+                {filteredCompetitors.map((item) => (
+                  <button
+                    key={item.name}
+                    type="button"
+                    onClick={() => selectCompetitor(item.name)}
+                    className={`w-full rounded-md border p-3 text-left text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-primary ${
+                      item.name === competitor.name
+                        ? "border-primary bg-primary/15 text-foreground"
+                        : "bg-secondary/25 text-foreground hover:border-primary/60 hover:bg-secondary/50"
+                    }`}
+                    aria-pressed={item.name === competitor.name}
+                  >
+                    <span className="font-medium">{item.name}</span>
+                    <span className="mt-1 block text-xs text-muted-foreground">{item.area} · {item.starRating}성</span>
+                  </button>
+                ))}
+              </div>
+            </div>
 
             <label className="text-sm font-medium" htmlFor="price-date">
               가격 확인 날짜
