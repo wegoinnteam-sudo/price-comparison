@@ -17,8 +17,19 @@ import {
 import { formatKrw } from "@/lib/utils";
 
 type StarRating = 1 | 2 | 3 | 4 | 5;
+type OtaPlatform = "Agoda" | "Booking.com" | "Hotels.com" | "Expedia" | "Trip.com" | "Hostelworld";
+type VerifiedOtaPrice = {
+  ota: OtaPlatform;
+  actualPrice: number | null;
+  taxIncluded: boolean | null;
+  refundable: boolean | null;
+  breakfastIncluded: boolean | null;
+  memberRate: string | null;
+  directPriceUrl: string | null;
+};
 
 const starOptions: StarRating[] = [1, 2, 3, 4, 5];
+const otaPlatforms: OtaPlatform[] = ["Agoda", "Booking.com", "Hotels.com", "Expedia", "Trip.com", "Hostelworld"];
 
 export function CompetitorPricingClient() {
   const [competitorName, setCompetitorName] = useState(seoulCompetitors[0].name);
@@ -45,6 +56,12 @@ export function CompetitorPricingClient() {
   const selectedWegoinnPrice = selectedPriceRoom
     ? wegoinnDateInfo.rooms.find((room) => room.roomType === selectedPriceRoom)
     : null;
+  const verifiedOtaPrices = useMemo(() => getVerifiedOtaPrices(), []);
+  const cheapestVerifiedOta = verifiedOtaPrices
+    .filter((row): row is VerifiedOtaPrice & { actualPrice: number; directPriceUrl: string } =>
+      row.actualPrice !== null && Boolean(row.directPriceUrl),
+    )
+    .sort((a, b) => a.actualPrice - b.actualPrice)[0];
   const averageGap = competitorDateInfo.average - wegoinnDateInfo.average;
   const chartData = useMemo(() => {
     const selectedData = getCompetitorRoomMonthlyHistory(competitor.name, selectedRooms);
@@ -183,7 +200,7 @@ export function CompetitorPricingClient() {
                   <p className="text-xs text-muted-foreground">주말 {formatKrw(room.weekend)}</p>
                   <p className="mt-2 text-xs text-primary">선택 업체 {formatKrw(room.selectedDateRate)}</p>
                   <p className="text-xs text-muted-foreground">Wegoinn {wego ? formatKrw(wego.selectedDateRate) : "-"}</p>
-                  <p className="mt-1 text-xs text-sky-300">선택일 가격 비교 및 OTA 열기</p>
+                  <p className="mt-1 text-xs text-sky-300">선택일 비교 및 검증 링크 확인</p>
                 </button>
               );
             })}
@@ -279,28 +296,60 @@ export function CompetitorPricingClient() {
               ) : null}
 
               <div className="rounded-md border bg-secondary/25 p-3 text-sm text-muted-foreground">
-                앱에 표시된 금액은 대시보드 추정/수집 데이터입니다. 아래 버튼으로 OTA 검색 결과를 열어 실제 판매가와 예약 가능 여부를 확인하세요.
+                OTA 메인/검색 결과 링크는 직접 가격 확인 링크로 표시하지 않습니다. 실제 판매가가 보이는 상세 예약 페이지가 수집된 OTA만 아래 표에 링크가 노출됩니다.
               </div>
 
-              <div className="grid gap-2 sm:grid-cols-2">
-                <a
-                  href={buildRoomBookingUrl(competitor.name, selectedPrice.roomType, selectedDate)}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground"
-                >
-                  Booking에서 금액 확인
-                  <ExternalLink className="h-4 w-4" />
-                </a>
-                <a
-                  href={buildRoomAgodaUrl(competitor.name, selectedPrice.roomType, selectedDate)}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex h-10 items-center justify-center gap-2 rounded-md border bg-secondary px-4 text-sm font-medium text-foreground hover:bg-secondary/80"
-                >
-                  Agoda에서 금액 확인
-                  <ExternalLink className="h-4 w-4" />
-                </a>
+              <div className="rounded-md border">
+                <div className="border-b bg-secondary/35 p-3">
+                  <p className="text-sm font-semibold">OTA 실제 판매가 검증</p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    {cheapestVerifiedOta
+                      ? `최저가: ${cheapestVerifiedOta.ota} ${formatKrw(cheapestVerifiedOta.actualPrice)}`
+                      : "아직 실제 금액이 노출된 상세 예약 페이지가 수집되지 않았습니다."}
+                  </p>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full min-w-[720px] text-left text-xs">
+                    <thead className="uppercase text-muted-foreground">
+                      <tr className="border-b">
+                        <th className="p-3">OTA</th>
+                        <th>실제 판매가</th>
+                        <th>세금 포함</th>
+                        <th>취소 가능</th>
+                        <th>조식</th>
+                        <th>회원가</th>
+                        <th className="text-right">직접 가격 확인 링크</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {verifiedOtaPrices.map((row) => (
+                        <tr key={row.ota} className="border-b border-border/60">
+                          <td className="p-3 font-medium">{row.ota}</td>
+                          <td>{row.actualPrice === null ? "미수집" : formatKrw(row.actualPrice)}</td>
+                          <td>{formatNullableBoolean(row.taxIncluded)}</td>
+                          <td>{formatNullableBoolean(row.refundable)}</td>
+                          <td>{formatNullableBoolean(row.breakfastIncluded)}</td>
+                          <td>{row.memberRate ?? "미확인"}</td>
+                          <td className="text-right">
+                            {row.directPriceUrl ? (
+                              <a
+                                href={row.directPriceUrl}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="inline-flex items-center justify-end gap-1 font-medium text-primary underline-offset-4 hover:underline"
+                              >
+                                직접 확인
+                                <ExternalLink className="h-3.5 w-3.5" />
+                              </a>
+                            ) : (
+                              <span className="text-muted-foreground">상세 가격 URL 미수집</span>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </div>
           </div>
@@ -351,47 +400,21 @@ function PriceBox({ label, value, highlight = false }: { label: string; value: s
   );
 }
 
-function buildRoomBookingUrl(competitorName: string, roomType: RoomType, checkIn: Date) {
-  const checkOut = new Date(checkIn);
-  checkOut.setDate(checkOut.getDate() + 1);
-
-  const params = new URLSearchParams({
-    ss: `${competitorName} ${roomType}`,
-    checkin: formatBookingDate(checkIn),
-    checkout: formatBookingDate(checkOut),
-    group_adults: roomType.includes("패밀리") || roomType.includes("4벙크") ? "4" : "2",
-    no_rooms: "1",
-    group_children: "0",
-    selected_currency: "KRW",
-    lang: "ko-kr",
-  });
-
-  return `https://www.booking.com/searchresults.html?${params.toString()}`;
+function getVerifiedOtaPrices(): VerifiedOtaPrice[] {
+  return otaPlatforms.map((ota) => ({
+    ota,
+    actualPrice: null,
+    taxIncluded: null,
+    refundable: null,
+    breakfastIncluded: null,
+    memberRate: null,
+    directPriceUrl: null,
+  }));
 }
 
-function buildRoomAgodaUrl(competitorName: string, roomType: RoomType, checkIn: Date) {
-  const checkOut = new Date(checkIn);
-  checkOut.setDate(checkOut.getDate() + 1);
-
-  const params = new URLSearchParams({
-    text: `${competitorName} ${roomType}`,
-    checkIn: formatBookingDate(checkIn),
-    checkOut: formatBookingDate(checkOut),
-    rooms: "1",
-    adults: roomType.includes("패밀리") || roomType.includes("4벙크") ? "4" : "2",
-    children: "0",
-    currency: "KRW",
-  });
-
-  return `https://www.agoda.com/search?${params.toString()}`;
-}
-
-function formatBookingDate(date: Date) {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-
-  return `${year}-${month}-${day}`;
+function formatNullableBoolean(value: boolean | null) {
+  if (value === null) return "미확인";
+  return value ? "예" : "아니오";
 }
 
 function MetricCard({ title, value, caption }: { title: string; value: string; caption: string }) {
