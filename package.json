@@ -11,6 +11,7 @@
     "start": "next start",
     "daily:update": "tsx scripts/daily-update.ts",
     "scrape:agoda": "tsx scripts/scrape-agoda.ts",
+    "scrape:skyscanner": "tsx scripts/scrape-skyscanner.ts",
     "ai:insights": "tsx scripts/generate-ai-insights.ts"
   },
   "dependencies": {

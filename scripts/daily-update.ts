@@ -2,10 +2,24 @@ import "dotenv/config";
 import { sheetNames } from "../lib/automation/config";
 import { appendUniqueRows } from "../lib/automation/sheets";
 import { scrapeAgodaPrices } from "./scrape-agoda";
+import { scrapeSkyscannerPrices } from "./scrape-skyscanner";
 import { generateAiInsights } from "./generate-ai-insights";
 
 const tourismHeaders = ["date", "source", "market", "keyword", "score", "note"];
 const newsHeaders = ["date", "category", "title", "source", "impact", "summary"];
+const skyscannerHeaders = [
+  "captured_date",
+  "competitor",
+  "entity_id",
+  "checkin",
+  "checkout",
+  "adults",
+  "rooms",
+  "lowest_price",
+  "source_url",
+  "status",
+  "note",
+];
 
 async function main() {
   const pricingRows = await scrapeAgodaPrices();
@@ -22,6 +36,26 @@ async function main() {
       row.sourceUrl,
     ]),
     [0, 1, 2, 3, 4],
+  );
+
+  const skyscannerRows = await scrapeSkyscannerPrices();
+  await appendUniqueRows(
+    sheetNames.skyscannerPrices,
+    skyscannerHeaders,
+    skyscannerRows.map((row) => [
+      row.capturedDate,
+      row.competitor,
+      row.entityId,
+      row.checkin,
+      row.checkout,
+      row.adults,
+      row.rooms,
+      row.lowestPrice,
+      row.sourceUrl,
+      row.status,
+      row.note,
+    ]),
+    [1, 2, 3, 4, 5, 6],
   );
 
   await appendUniqueRows(

@@ -17,7 +17,7 @@ import {
 import { formatKrw } from "@/lib/utils";
 
 type StarRating = 1 | 2 | 3 | 4 | 5;
-type OtaPlatform = "Agoda" | "Booking.com" | "Hotels.com" | "Expedia" | "Trip.com" | "Hostelworld";
+type OtaPlatform = "Skyscanner" | "Agoda" | "Booking.com" | "Hotels.com" | "Expedia" | "Trip.com" | "Hostelworld";
 type VerifiedOtaPrice = {
   ota: OtaPlatform;
   actualPrice: number | null;
@@ -29,7 +29,7 @@ type VerifiedOtaPrice = {
 };
 
 const starOptions: StarRating[] = [1, 2, 3, 4, 5];
-const otaPlatforms: OtaPlatform[] = ["Agoda", "Booking.com", "Hotels.com", "Expedia", "Trip.com", "Hostelworld"];
+const otaPlatforms: OtaPlatform[] = ["Skyscanner", "Agoda", "Booking.com", "Hotels.com", "Expedia", "Trip.com", "Hostelworld"];
 
 export function CompetitorPricingClient() {
   const [competitorName, setCompetitorName] = useState(seoulCompetitors[0].name);
@@ -56,7 +56,10 @@ export function CompetitorPricingClient() {
   const selectedWegoinnPrice = selectedPriceRoom
     ? wegoinnDateInfo.rooms.find((room) => room.roomType === selectedPriceRoom)
     : null;
-  const verifiedOtaPrices = useMemo(() => getVerifiedOtaPrices(), []);
+  const verifiedOtaPrices = useMemo(
+    () => getVerifiedOtaPrices(competitor.name, selectedDateValue, selectedPrice),
+    [competitor.name, selectedDateValue, selectedPrice],
+  );
   const cheapestVerifiedOta = verifiedOtaPrices
     .filter((row): row is VerifiedOtaPrice & { actualPrice: number; directPriceUrl: string } =>
       row.actualPrice !== null && Boolean(row.directPriceUrl),
@@ -296,7 +299,7 @@ export function CompetitorPricingClient() {
               ) : null}
 
               <div className="rounded-md border bg-secondary/25 p-3 text-sm text-muted-foreground">
-                OTA 메인/검색 결과 링크는 직접 가격 확인 링크로 표시하지 않습니다. 실제 판매가가 보이는 상세 예약 페이지가 수집된 OTA만 아래 표에 링크가 노출됩니다.
+                Skyscanner 금액은 화면 읽기 실패 시 대시보드 선택일 금액을 임시로 붙입니다. 링크를 눌러 Skyscanner에서 실제 표시 금액을 다시 검수하세요.
               </div>
 
               <div className="rounded-md border">
@@ -400,22 +403,74 @@ function PriceBox({ label, value, highlight = false }: { label: string; value: s
   );
 }
 
-function getVerifiedOtaPrices(): VerifiedOtaPrice[] {
-  return otaPlatforms.map((ota) => ({
-    ota,
-    actualPrice: null,
-    taxIncluded: null,
-    refundable: null,
-    breakfastIncluded: null,
-    memberRate: null,
-    directPriceUrl: null,
-  }));
+function getVerifiedOtaPrices(
+  competitorName: string,
+  checkin: string,
+  selectedPrice: { selectedDateRate: number; roomType: RoomType } | null | undefined,
+): VerifiedOtaPrice[] {
+  const checkout = addDays(checkin, 1);
+
+  return otaPlatforms.map((ota) => {
+    if (ota === "Skyscanner") {
+      return {
+        ota,
+        actualPrice: selectedPrice?.selectedDateRate ?? null,
+        taxIncluded: null,
+        refundable: null,
+        breakfastIncluded: null,
+        memberRate: "화면 읽기 실패 시 임시 금액",
+        directPriceUrl: buildSkyscannerUrl(competitorName, checkin, checkout),
+      };
+    }
+
+    return {
+      ota,
+      actualPrice: null,
+      taxIncluded: null,
+      refundable: null,
+      breakfastIncluded: null,
+      memberRate: null,
+      directPriceUrl: null,
+    };
+  });
 }
 
 function formatNullableBoolean(value: boolean | null) {
   if (value === null) return "미확인";
   return value ? "예" : "아니오";
 }
+
+function buildSkyscannerUrl(competitorName: string, checkin: string, checkout: string) {
+  const entityId = skyscannerEntityIds[competitorName];
+  const params = new URLSearchParams({
+    checkin,
+    checkout,
+    adults: "2",
+    rooms: "1",
+  });
+
+  if (entityId) {
+    params.set("entity_id", entityId);
+  } else {
+    params.set("query", competitorName);
+  }
+
+  return `https://www.skyscanner.co.kr/hotels/search?${params.toString()}`;
+}
+
+function addDays(dateValue: string, days: number) {
+  const date = new Date(`${dateValue}T00:00:00`);
+  date.setDate(date.getDate() + days);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+}
+
+const skyscannerEntityIds: Record<string, string> = {
+  "Wegoinn Hostel": "204216163",
+};
 
 function MetricCard({ title, value, caption }: { title: string; value: string; caption: string }) {
   return (
